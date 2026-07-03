@@ -195,6 +195,7 @@
             font-size: 12px;
             padding: 4px;
             min-height: 16px;
+            width: 100%;
         }
 
         .status.error {
@@ -322,87 +323,96 @@
         const canvas = document.getElementById('gameCanvas');
         const status = document.getElementById('status');
 
-        // Mapeo de teclas
-        const buttonMap = {
-            'btnUp': 6,      // UP
-            'btnDown': 7,    // DOWN
-            'btnLeft': 5,    // LEFT
-            'btnRight': 4,   // RIGHT
-            'btnA': 0,       // A
-            'btnB': 1,       // B
-            'btnL': 9,       // L
-            'btnR': 8,       // R
-            'btnSel': 2,     // SELECT
-            'btnStr': 3      // START
+        console.log('Script iniciado');
+
+        // Mapeo de teclas GBA
+        const GBA_KEYS = {
+            A: 0,
+            B: 1,
+            SELECT: 2,
+            START: 3,
+            RIGHT: 4,
+            LEFT: 5,
+            UP: 6,
+            DOWN: 7,
+            R: 8,
+            L: 9
         };
 
         function setupButton(selector, key) {
             const btn = document.querySelector(selector);
-            if (!btn) return;
+            if (!btn) {
+                console.warn('No se encontró el botón:', selector);
+                return;
+            }
+
+            const handlePress = () => {
+                if (emulator && emulator.keyboardHandler) {
+                    emulator.keyboardHandler[key] = true;
+                    navigator.vibrate && navigator.vibrate(20);
+                }
+            };
+
+            const handleRelease = () => {
+                if (emulator && emulator.keyboardHandler) {
+                    emulator.keyboardHandler[key] = false;
+                }
+            };
 
             btn.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                if (emulator) emulator.keyboardHandler[key] = true;
-                navigator.vibrate && navigator.vibrate(20);
+                handlePress();
             });
 
             btn.addEventListener('touchend', (e) => {
                 e.preventDefault();
-                if (emulator) emulator.keyboardHandler[key] = false;
+                handleRelease();
             });
 
-            btn.addEventListener('mousedown', () => {
-                if (emulator) emulator.keyboardHandler[key] = true;
-            });
-
-            btn.addEventListener('mouseup', () => {
-                if (emulator) emulator.keyboardHandler[key] = false;
-            });
-
-            btn.addEventListener('mouseleave', () => {
-                if (emulator) emulator.keyboardHandler[key] = false;
-            });
+            btn.addEventListener('mousedown', handlePress);
+            btn.addEventListener('mouseup', handleRelease);
+            btn.addEventListener('mouseleave', handleRelease);
         }
 
         // Configurar todos los botones
-        setupButton('.dpad-up', buttonMap.btnUp);
-        setupButton('.dpad-down', buttonMap.btnDown);
-        setupButton('.dpad-left', buttonMap.btnLeft);
-        setupButton('.dpad-right', buttonMap.btnRight);
-        setupButton('#btnA', buttonMap.btnA);
-        setupButton('#btnB', buttonMap.btnB);
-        setupButton('#btnL', buttonMap.btnL);
-        setupButton('#btnR', buttonMap.btnR);
-        setupButton('#btnSel', buttonMap.btnSel);
-        setupButton('#btnStr', buttonMap.btnStr);
+        setupButton('.dpad-up', GBA_KEYS.UP);
+        setupButton('.dpad-down', GBA_KEYS.DOWN);
+        setupButton('.dpad-left', GBA_KEYS.LEFT);
+        setupButton('.dpad-right', GBA_KEYS.RIGHT);
+        setupButton('#btnA', GBA_KEYS.A);
+        setupButton('#btnB', GBA_KEYS.B);
+        setupButton('#btnL', GBA_KEYS.L);
+        setupButton('#btnR', GBA_KEYS.R);
+        setupButton('#btnSel', GBA_KEYS.SELECT);
+        setupButton('#btnStr', GBA_KEYS.START);
 
         // Teclado
         const keyMap = {
-            'ArrowUp': buttonMap.btnUp,
-            'ArrowDown': buttonMap.btnDown,
-            'ArrowLeft': buttonMap.btnLeft,
-            'ArrowRight': buttonMap.btnRight,
-            'z': buttonMap.btnA,
-            'Z': buttonMap.btnA,
-            'x': buttonMap.btnB,
-            'X': buttonMap.btnB,
-            'q': buttonMap.btnL,
-            'Q': buttonMap.btnL,
-            'w': buttonMap.btnR,
-            'W': buttonMap.btnR,
-            'Enter': buttonMap.btnStr,
-            ' ': buttonMap.btnSel
+            'ArrowUp': GBA_KEYS.UP,
+            'ArrowDown': GBA_KEYS.DOWN,
+            'ArrowLeft': GBA_KEYS.LEFT,
+            'ArrowRight': GBA_KEYS.RIGHT,
+            'z': GBA_KEYS.A,
+            'Z': GBA_KEYS.A,
+            'x': GBA_KEYS.B,
+            'X': GBA_KEYS.B,
+            'q': GBA_KEYS.L,
+            'Q': GBA_KEYS.L,
+            'w': GBA_KEYS.R,
+            'W': GBA_KEYS.R,
+            'Enter': GBA_KEYS.START,
+            ' ': GBA_KEYS.SELECT
         };
 
         document.addEventListener('keydown', (e) => {
-            if (emulator && keyMap[e.key] !== undefined) {
+            if (emulator && emulator.keyboardHandler && keyMap[e.key] !== undefined) {
                 emulator.keyboardHandler[keyMap[e.key]] = true;
                 if (e.key === ' ') e.preventDefault();
             }
         });
 
         document.addEventListener('keyup', (e) => {
-            if (emulator && keyMap[e.key] !== undefined) {
+            if (emulator && emulator.keyboardHandler && keyMap[e.key] !== undefined) {
                 emulator.keyboardHandler[keyMap[e.key]] = false;
                 if (e.key === ' ') e.preventDefault();
             }
@@ -412,20 +422,52 @@
             try {
                 status.textContent = '⏳ Cargando ROM...';
 
-                const response = await fetch('Pokemon - FireRed Version (USA).gba');
-                if (!response.ok) throw new Error(`Error: ${response.status}`);
+                console.log('Intentando cargar ROM');
+                const romPath = 'Pokemon - FireRed Version (USA).gba';
+                const response = await fetch(romPath);
+
+                console.log('Response status:', response.status);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP Error: ${response.status}`);
+                }
 
                 const romData = await response.arrayBuffer();
+                console.log('ROM cargada, tamaño:', romData.byteLength, 'bytes');
 
+                if (romData.byteLength === 0) {
+                    throw new Error('ROM vacía');
+                }
+
+                console.log('Inicializando emulador');
                 emulator = new window.GameBoyAdvance();
+
+                if (!emulator) {
+                    throw new Error('No se pudo crear instancia del emulador');
+                }
+
+                console.log('Emulador creado');
                 emulator.setCanvasScale(1);
                 emulator.attachCanvas(canvas);
-                emulator.loadRom(romData);
+
+                console.log('Cargando ROM en emulador');
+                emulator.loadRom(new Uint8Array(romData));
+
+                console.log('ROM cargada en emulador, iniciando game loop');
 
                 // Game loop
+                let frameCount = 0;
                 const loop = () => {
-                    if (emulator) {
-                        emulator.advanceFrame();
+                    try {
+                        if (emulator) {
+                            emulator.advanceFrame();
+                            frameCount++;
+                            if (frameCount % 60 === 0) {
+                                console.log('Frames:', frameCount);
+                            }
+                        }
+                    } catch (err) {
+                        console.error('Error en game loop:', err);
                     }
                     requestAnimationFrame(loop);
                 };
@@ -434,19 +476,25 @@
                 status.textContent = '▶️ Pokémon Fire Red';
                 status.classList.remove('error');
 
+                console.log('Emulador iniciado correctamente');
+
                 // Pantalla completa en móviles
                 if (window.innerWidth < 768) {
                     document.body.requestFullscreen?.().catch(() => {});
                 }
 
             } catch (error) {
-                console.error(error);
+                console.error('Error en init:', error);
                 status.textContent = '❌ ' + error.message;
                 status.classList.add('error');
             }
         }
 
-        window.addEventListener('load', init);
+        if (document.readyState === 'loading') {
+            window.addEventListener('load', init);
+        } else {
+            init();
+        }
     </script>
 </body>
 </html>
