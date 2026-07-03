@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokémon Fire Red - Aippy</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .emulator-section {
+            background: #f5f5f5;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .emulator-frame {
+            background: black;
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 500px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        input[type="file"] {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            flex: 1;
+        }
+
+        .info-section {
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .info-section h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .info-section p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .keyboard-info {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .keyboard-info h4 {
+            color: #cc7000;
+            margin-bottom: 10px;
+        }
+
+        .keyboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-size: 0.9em;
+            color: #333;
+        }
+
+        .key-info {
+            background: white;
+            padding: 8px;
+            border-radius: 5px;
+            border-left: 3px solid #ffc107;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .error {
+            display: none;
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .controls {
+                grid-template-columns: 1fr;
+            }
+
+            .keyboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Pokémon Fire Red - Aippy</h1>
+        <p class="subtitle">Emulador GBA Web - Juega en tu navegador</p>
+
+        <div class="error" id="error"></div>
+
+        <div class="emulator-section">
+            <div class="emulator-frame">
+                <canvas id="canvas"></canvas>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <input type="file" id="romFile" accept=".gba,.bin" title="Selecciona un archivo .gba">
+                </div>
+                <div class="control-group">
+                    <button class="btn-primary" onclick="loadROM()" title="Cargar ROM">📂 Cargar ROM</button>
+                </div>
+            </div>
+
+            <div class="controls">
+                <div class="control-group">
+                    <button class="btn-secondary" onclick="pauseGame()" title="Pausar juego">⏸️ Pausar</button>
+                    <button class="btn-secondary" onclick="resumeGame()" title="Reanudar juego">▶️ Reanudar</button>
+                </div>
+                <div class="control-group">
+                    <button class="btn-secondary" onclick="resetGame()" title="Reiniciar juego">🔄 Reiniciar</button>
+                    <button class="btn-secondary" onclick="fullscreenGame()" title="Pantalla completa">🖥️ Pantalla Completa</button>
+                </div>
+            </div>
+
+            <div class="loading" id="loading">Cargando emulador...</div>
+        </div>
+
+        <div class="info-section">
+            <h3>ℹ️ Información</h3>
+            <p><strong>Emulador:</strong> mgba-wasm (Game Boy Advance)</p>
+            <p><strong>Compatibilidad:</strong> Soporta archivos .gba y .bin</p>
+            <p><strong>Controles:</strong> Teclado o archivo ROM personalizado</p>
+        </div>
+
+        <div class="keyboard-info">
+            <h4>⌨️ Controles del Teclado</h4>
+            <div class="keyboard-grid">
+                <div class="key-info"><strong>↑ ↓ ← →</strong> Movimiento</div>
+                <div class="key-info"><strong>Z</strong> Botón A</div>
+                <div class="key-info"><strong>X</strong> Botón B</div>
+                <div class="key-info"><strong>A</strong> Hombro Izq</div>
+                <div class="key-info"><strong>S</strong> Hombro Der</div>
+                <div class="key-info"><strong>Enter</strong> Start</div>
+                <div class="key-info"><strong>Espacio</strong> Select</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://s3.amazonaws.com/mgba/mgba.js"></script>
+    <script>
+        let gameboy = null;
+        let isPaused = false;
+
+        function initEmulator() {
+            document.getElementById('loading').style.display = 'block';
+            
+            if (typeof Module !== 'undefined' && Module.onRuntimeInitialized) {
+                setupEmulator();
+            } else {
+                setTimeout(initEmulator, 500);
+            }
+        }
+
+        function setupEmulator() {
+            try {
+                gameboy = new GameBoyAdvance();
+                gameboy.setCanvasElement(document.getElementById('canvas'));
+                document.getElementById('loading').style.display = 'none';
+            } catch (error) {
+                showError('Error inicializando emulador: ' + error.message);
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function loadROM() {
+            const fileInput = document.getElementById('romFile');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showError('Por favor selecciona un archivo .gba');
+                return;
+            }
+
+            if (!gameboy) {
+                showError('Emulador no inicializado');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const rom = new Uint8Array(e.target.result);
+                    gameboy.loadRom(rom);
+                    gameboy.play();
+                    isPaused = false;
+                    document.getElementById('error').style.display = 'none';
+                } catch (error) {
+                    showError('Error cargando ROM: ' + error.message);
+                }
+            };
+
+            reader.onerror = function() {
+                showError('Error leyendo archivo');
+            };
+
+            reader.readAsArrayBuffer(file);
+        }
+
+        function pauseGame() {
+            if (gameboy && !isPaused) {
+                gameboy.pause();
+                isPaused = true;
+            }
+        }
+
+        function resumeGame() {
+            if (gameboy && isPaused) {
+                gameboy.play();
+                isPaused = false;
+            }
+        }
+
+        function resetGame() {
+            if (gameboy) {
+                gameboy.reset();
+                isPaused = false;
+            }
+        }
+
+        function fullscreenGame() {
+            const canvas = document.getElementById('canvas');
+            if (canvas.requestFullscreen) {
+                canvas.requestFullscreen();
+            } else if (canvas.webkitRequestFullscreen) {
+                canvas.webkitRequestFullscreen();
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        // Iniciar emulador cuando carga la página
+        window.addEventListener('load', initEmulator);
+
+        // Controles de teclado
+        document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('keyup', handleKeyUp);
+
+        function handleKeyDown(e) {
+            if (!gameboy) return;
+
+            const keyMap = {
+                'ArrowUp': 0,
+                'ArrowDown': 1,
+                'ArrowLeft': 2,
+                'ArrowRight': 3,
+                'z': 4,
+                'x': 5,
+                'a': 6,
+                's': 7,
+                'Enter': 8,
+                ' ': 9
+            };
+
+            const key = keyMap[e.key.toLowerCase()] ?? keyMap[e.key];
+            if (key !== undefined) {
+                gameboy.keyDown(key);
+                e.preventDefault();
+            }
+        }
+
+        function handleKeyUp(e) {
+            if (!gameboy) return;
+
+            const keyMap = {
+                'ArrowUp': 0,
+                'ArrowDown': 1,
+                'ArrowLeft': 2,
+                'ArrowRight': 3,
+                'z': 4,
+                'x': 5,
+                'a': 6,
+                's': 7,
+                'Enter': 8,
+                ' ': 9
+            };
+
+            const key = keyMap[e.key.toLowerCase()] ?? keyMap[e.key];
+            if (key !== undefined) {
+                gameboy.keyUp(key);
+                e.preventDefault();
+            }
+        }
+    </script>
+</body>
+</html>
