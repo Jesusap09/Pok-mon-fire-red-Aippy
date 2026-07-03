@@ -6,8 +6,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Pokémon Fire Red">
-    <meta name="theme-color" content="#667eea">
-    <title>Pokémon Fire Red - GBA</title>
+    <meta name="theme-color" content="#FF0000">
+    <title>Pokémon Fire Red</title>
     <style>
         * {
             margin: 0;
@@ -22,58 +22,40 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
+            background: #000;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #1a1a1a;
+        }
+
+        body.fullscreen {
+            width: 100vw;
+            height: 100vh;
         }
 
         .container {
             width: 100%;
-            height: 100vh;
+            height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            background: #1a1a1a;
             padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
-        .header {
-            flex-shrink: 0;
-            text-align: center;
-            padding: 5px 10px 3px;
-            background: rgba(0, 0, 0, 0.2);
-        }
-
-        h1 {
-            font-size: 1.1em;
-            color: white;
-            margin: 0;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        .subtitle {
-            font-size: 0.65em;
-            color: rgba(255, 255, 255, 0.8);
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-            margin: 0;
-        }
-
-        .screen-container {
+        .screen-area {
             flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 0;
-            padding: 6px;
+            padding: 10px;
         }
 
-        .emulator-frame {
-            background: #000;
-            border-radius: 8px;
-            padding: 4px;
+        .screen-wrapper {
             width: 100%;
-            max-width: 100%;
+            max-width: 480px;
             aspect-ratio: 3/2;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0, 0, 0, 0.8);
+            background: #000;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -86,118 +68,46 @@
             display: block;
             image-rendering: pixelated;
             image-rendering: -moz-crisp-edges;
-            image-rendering: crisp-edges;
-            max-width: 100%;
-            max-height: 100%;
         }
 
-        .controls-section {
-            flex-shrink: 0;
-            padding: 6px 8px 8px;
+        .controls-area {
             display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .file-section {
-            display: flex;
-            gap: 6px;
-            width: 100%;
-        }
-
-        button {
-            padding: 8px;
-            font-size: 0.75em;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-weight: bold;
-            color: white;
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-reset {
-            background: rgba(244, 67, 54, 0.7);
-            border: 2px solid rgba(244, 67, 54, 0.9);
-            flex: 1;
-            padding: 6px;
-            font-size: 0.7em;
-        }
-
-        .btn-reset:active {
-            transform: scale(0.95);
-            background: rgba(244, 67, 54, 0.9);
-        }
-
-        .gamepad {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 8px;
-            padding: 6px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .status-bar {
+            gap: 15px;
+            padding: 15px;
             background: rgba(0, 0, 0, 0.5);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.7em;
-            text-align: center;
-            min-height: 18px;
-            display: flex;
-            align-items: center;
             justify-content: center;
+            align-items: flex-end;
+            flex-wrap: wrap;
         }
 
-        .error {
-            background: rgba(244, 67, 54, 0.9) !important;
-        }
-
-        .success {
-            background: rgba(76, 175, 80, 0.9) !important;
-        }
-
-        .loading {
-            background: rgba(102, 126, 234, 0.9) !important;
-        }
-
-        .gamepad-grid {
+        .dpad {
             display: grid;
-            grid-template-columns: 45% 45%;
-            gap: 6px;
-            justify-content: space-between;
-        }
-
-        .dpad-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 4px;
-            aspect-ratio: 1;
+            grid-template-columns: 50px 50px 50px;
+            grid-template-rows: 50px 50px 50px;
+            gap: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px;
+            border-radius: 8px;
         }
 
         .dpad-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
             color: white;
-            font-size: 1.1em;
+            font-size: 20px;
+            font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.1s ease;
-            padding: 0;
-            min-height: 30px;
-            user-select: none;
+            transition: all 0.1s;
+            touch-action: none;
         }
 
         .dpad-btn:active {
-            background: rgba(102, 126, 234, 0.8);
-            transform: scale(0.92);
-            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0.9);
         }
 
         .dpad-up { grid-column: 2; grid-row: 1; }
@@ -205,148 +115,202 @@
         .dpad-down { grid-column: 2; grid-row: 3; }
         .dpad-right { grid-column: 3; grid-row: 2; }
 
-        .button-pair {
+        .action-buttons {
             display: flex;
-            gap: 4px;
-            align-items: stretch;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
         }
 
-        .action-btn {
-            width: 35px;
-            height: 35px;
+        .action-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-action {
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            color: white;
-            font-size: 1.1em;
+            border: 2px solid;
+            font-size: 18px;
             font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.1s ease;
-            padding: 0;
-            flex: 1;
-            min-width: 35px;
-            user-select: none;
-        }
-
-        .action-btn:active {
-            background: rgba(102, 126, 234, 0.8);
-            transform: scale(0.92);
-            border-color: #667eea;
+            transition: all 0.1s;
+            touch-action: none;
         }
 
         .btn-a {
-            background: rgba(76, 175, 80, 0.3) !important;
-            border-color: rgba(76, 175, 80, 0.6) !important;
+            background: rgba(76, 175, 80, 0.4);
+            border-color: rgba(76, 175, 80, 0.8);
+            color: #4caf50;
         }
 
         .btn-a:active {
-            background: rgba(76, 175, 80, 0.8) !important;
+            background: rgba(76, 175, 80, 0.7);
+            transform: scale(0.9);
         }
 
         .btn-b {
-            background: rgba(244, 67, 54, 0.3) !important;
-            border-color: rgba(244, 67, 54, 0.6) !important;
+            background: rgba(244, 67, 54, 0.4);
+            border-color: rgba(244, 67, 54, 0.8);
+            color: #f44336;
         }
 
         .btn-b:active {
-            background: rgba(244, 67, 54, 0.8) !important;
+            background: rgba(244, 67, 54, 0.7);
+            transform: scale(0.9);
+        }
+
+        .shoulder-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.1s;
+            touch-action: none;
+            min-width: 50px;
+        }
+
+        .shoulder-btn:active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0.95);
         }
 
         .shoulder-row {
             display: flex;
-            gap: 4px;
+            gap: 8px;
+            justify-content: center;
+            width: 100%;
         }
 
-        .shoulder-btn {
-            flex: 1;
-            padding: 6px;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.4);
-            font-size: 0.65em;
-            color: white;
-            font-weight: bold;
-            user-select: none;
+        .status {
+            text-align: center;
+            color: #4caf50;
+            font-size: 12px;
+            padding: 4px;
+            min-height: 16px;
         }
 
-        .shoulder-btn:active {
-            background: rgba(102, 126, 234, 0.8);
-            transform: scale(0.95);
-            border-color: #667eea;
+        .status.error {
+            color: #f44336;
         }
 
+        /* Landscape mode */
         @media (orientation: landscape) {
             .container {
                 flex-direction: row;
+                gap: 10px;
             }
 
-            .header {
-                padding: 4px;
-                flex-shrink: 0;
-                min-width: 120px;
-                display: flex;
+            .screen-area {
+                flex: 1;
+                padding: 8px;
+            }
+
+            .screen-wrapper {
+                max-width: 100%;
+                max-height: 100%;
+            }
+
+            .controls-area {
                 flex-direction: column;
-                justify-content: center;
+                gap: 10px;
+                padding: 10px;
+                max-width: 320px;
+                overflow-y: auto;
             }
 
-            h1 { font-size: 0.95em; }
-            .subtitle { font-size: 0.6em; }
-            .screen-container { flex: 1; padding: 4px; }
-            .emulator-frame { padding: 3px; border-radius: 6px; }
-            .controls-section { flex-shrink: 0; width: 110px; padding: 4px; gap: 4px; }
-            .gamepad-grid { grid-template-columns: 1fr; }
-            .btn-reset { font-size: 0.6em; padding: 4px; }
-            .action-btn { width: 30px; height: 30px; font-size: 0.9em; }
-            .status-bar { padding: 2px 4px; font-size: 0.6em; min-height: 16px; }
+            .dpad {
+                grid-template-columns: 45px 45px 45px;
+                grid-template-rows: 45px 45px 45px;
+                gap: 1px;
+                padding: 6px;
+            }
+
+            .dpad-btn {
+                font-size: 16px;
+            }
+
+            .btn-action {
+                width: 45px;
+                height: 45px;
+                font-size: 16px;
+            }
+
+            .shoulder-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+                min-width: 45px;
+            }
+
+            .shoulder-row {
+                gap: 6px;
+            }
+
+            .action-row {
+                gap: 10px;
+            }
+        }
+
+        /* Para pantallas muy pequeñas */
+        @media (max-width: 320px) {
+            .dpad {
+                grid-template-columns: 35px 35px 35px;
+                grid-template-rows: 35px 35px 35px;
+            }
+
+            .btn-action {
+                width: 40px;
+                height: 40px;
+                font-size: 14px;
+            }
+
+            .shoulder-btn {
+                padding: 4px 8px;
+                font-size: 10px;
+                min-width: 40px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>🎮 Pokémon Fire Red</h1>
-            <p class="subtitle">GBA</p>
-        </div>
-
-        <div class="screen-container">
-            <div class="emulator-frame">
+        <div class="screen-area">
+            <div class="screen-wrapper">
                 <canvas id="gameCanvas" width="240" height="160"></canvas>
             </div>
         </div>
 
-        <div class="controls-section">
-            <div class="status-bar" id="status">⏳ Cargando ROM...</div>
+        <div class="controls-area">
+            <div class="status" id="status">⏳ Cargando...</div>
 
-            <div class="file-section">
-                <button class="btn-reset" id="resetBtn" onclick="resetGame()">🔄 Reset</button>
+            <!-- D-Pad -->
+            <div class="dpad">
+                <button class="dpad-btn dpad-up">⬆️</button>
+                <button class="dpad-btn dpad-left">⬅️</button>
+                <button class="dpad-btn dpad-down">⬇️</button>
+                <button class="dpad-btn dpad-right">➡️</button>
             </div>
 
-            <div class="gamepad">
-                <div class="gamepad-grid">
-                    <div class="dpad-container">
-                        <button class="dpad-btn dpad-up" data-key="UP">⬆</button>
-                        <button class="dpad-btn dpad-left" data-key="LEFT">⬅</button>
-                        <button class="dpad-btn dpad-down" data-key="DOWN">⬇</button>
-                        <button class="dpad-btn dpad-right" data-key="RIGHT">➡</button>
-                    </div>
-
-                    <div class="button-pair">
-                        <button class="action-btn btn-b" data-key="B">B</button>
-                        <button class="action-btn btn-a" data-key="A">A</button>
-                    </div>
+            <!-- Botones de acción -->
+            <div class="action-buttons">
+                <div class="action-row">
+                    <button class="btn-action btn-b" id="btnB">B</button>
+                    <button class="btn-action btn-a" id="btnA">A</button>
                 </div>
-
-                <div class="shoulder-row" style="margin-top: 4px;">
-                    <button class="shoulder-btn" data-key="L">L</button>
-                    <button class="shoulder-btn" data-key="R">R</button>
+                <div class="shoulder-row">
+                    <button class="shoulder-btn" id="btnL">L</button>
+                    <button class="shoulder-btn" id="btnR">R</button>
                 </div>
-
-                <div class="shoulder-row" style="margin-top: 4px;">
-                    <button class="shoulder-btn" data-key="SELECT">SEL</button>
-                    <button class="shoulder-btn" data-key="START">STR</button>
+                <div class="shoulder-row">
+                    <button class="shoulder-btn" id="btnSel">SEL</button>
+                    <button class="shoulder-btn" id="btnStr">STR</button>
                 </div>
             </div>
         </div>
@@ -355,142 +319,134 @@
     <script src="https://gbjs.org/gba.js"></script>
     <script>
         let emulator = null;
+        const canvas = document.getElementById('gameCanvas');
         const status = document.getElementById('status');
-        const keyStates = {};
 
-        function updateStatus(message, type = 'info') {
-            status.textContent = message;
-            status.className = 'status-bar';
-            if (type === 'error') status.classList.add('error');
-            if (type === 'success') status.classList.add('success');
-            if (type === 'loading') status.classList.add('loading');
-        }
+        // Mapeo de teclas
+        const buttonMap = {
+            'btnUp': 6,      // UP
+            'btnDown': 7,    // DOWN
+            'btnLeft': 5,    // LEFT
+            'btnRight': 4,   // RIGHT
+            'btnA': 0,       // A
+            'btnB': 1,       // B
+            'btnL': 9,       // L
+            'btnR': 8,       // R
+            'btnSel': 2,     // SELECT
+            'btnStr': 3      // START
+        };
 
-        function handleKeyPress(key, isPressed) {
-            if (!emulator) return;
+        function setupButton(selector, key) {
+            const btn = document.querySelector(selector);
+            if (!btn) return;
 
-            const keyMap = {
-                'A': 0,
-                'B': 1,
-                'SELECT': 2,
-                'START': 3,
-                'RIGHT': 4,
-                'LEFT': 5,
-                'UP': 6,
-                'DOWN': 7,
-                'R': 8,
-                'L': 9
-            };
-
-            if (keyMap.hasOwnProperty(key)) {
-                keyStates[key] = isPressed;
-                emulator.keyboardHandler[keyMap[key]] = isPressed;
-            }
-        }
-
-        // Configurar botones táctiles
-        document.querySelectorAll('button[data-key]').forEach(btn => {
             btn.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                handleKeyPress(btn.dataset.key, true);
+                if (emulator) emulator.keyboardHandler[key] = true;
+                navigator.vibrate && navigator.vibrate(20);
             });
+
             btn.addEventListener('touchend', (e) => {
                 e.preventDefault();
-                handleKeyPress(btn.dataset.key, false);
+                if (emulator) emulator.keyboardHandler[key] = false;
             });
-            btn.addEventListener('mousedown', () => {
-                handleKeyPress(btn.dataset.key, true);
-            });
-            btn.addEventListener('mouseup', () => {
-                handleKeyPress(btn.dataset.key, false);
-            });
-            btn.addEventListener('mouseleave', () => {
-                handleKeyPress(btn.dataset.key, false);
-            });
-        });
 
-        // Configurar teclado
-        const keyboardMap = {
-            'ArrowUp': 'UP',
-            'ArrowDown': 'DOWN',
-            'ArrowLeft': 'LEFT',
-            'ArrowRight': 'RIGHT',
-            'z': 'A',
-            'Z': 'A',
-            'x': 'B',
-            'X': 'B',
-            'q': 'L',
-            'Q': 'L',
-            'w': 'R',
-            'W': 'R',
-            'Enter': 'START',
-            ' ': 'SELECT'
+            btn.addEventListener('mousedown', () => {
+                if (emulator) emulator.keyboardHandler[key] = true;
+            });
+
+            btn.addEventListener('mouseup', () => {
+                if (emulator) emulator.keyboardHandler[key] = false;
+            });
+
+            btn.addEventListener('mouseleave', () => {
+                if (emulator) emulator.keyboardHandler[key] = false;
+            });
+        }
+
+        // Configurar todos los botones
+        setupButton('.dpad-up', buttonMap.btnUp);
+        setupButton('.dpad-down', buttonMap.btnDown);
+        setupButton('.dpad-left', buttonMap.btnLeft);
+        setupButton('.dpad-right', buttonMap.btnRight);
+        setupButton('#btnA', buttonMap.btnA);
+        setupButton('#btnB', buttonMap.btnB);
+        setupButton('#btnL', buttonMap.btnL);
+        setupButton('#btnR', buttonMap.btnR);
+        setupButton('#btnSel', buttonMap.btnSel);
+        setupButton('#btnStr', buttonMap.btnStr);
+
+        // Teclado
+        const keyMap = {
+            'ArrowUp': buttonMap.btnUp,
+            'ArrowDown': buttonMap.btnDown,
+            'ArrowLeft': buttonMap.btnLeft,
+            'ArrowRight': buttonMap.btnRight,
+            'z': buttonMap.btnA,
+            'Z': buttonMap.btnA,
+            'x': buttonMap.btnB,
+            'X': buttonMap.btnB,
+            'q': buttonMap.btnL,
+            'Q': buttonMap.btnL,
+            'w': buttonMap.btnR,
+            'W': buttonMap.btnR,
+            'Enter': buttonMap.btnStr,
+            ' ': buttonMap.btnSel
         };
 
         document.addEventListener('keydown', (e) => {
-            if (keyboardMap[e.key]) {
-                handleKeyPress(keyboardMap[e.key], true);
+            if (emulator && keyMap[e.key] !== undefined) {
+                emulator.keyboardHandler[keyMap[e.key]] = true;
                 if (e.key === ' ') e.preventDefault();
             }
         });
 
         document.addEventListener('keyup', (e) => {
-            if (keyboardMap[e.key]) {
-                handleKeyPress(keyboardMap[e.key], false);
+            if (emulator && keyMap[e.key] !== undefined) {
+                emulator.keyboardHandler[keyMap[e.key]] = false;
                 if (e.key === ' ') e.preventDefault();
             }
         });
 
-        async function initEmulator() {
+        async function init() {
             try {
-                updateStatus('⏳ Cargando ROM...', 'loading');
+                status.textContent = '⏳ Cargando ROM...';
 
                 const response = await fetch('Pokemon - FireRed Version (USA).gba');
-                
-                if (!response.ok) {
-                    throw new Error(`Error HTTP: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`Error: ${response.status}`);
 
                 const romData = await response.arrayBuffer();
-                const canvas = document.getElementById('gameCanvas');
 
                 emulator = new window.GameBoyAdvance();
                 emulator.setCanvasScale(1);
                 emulator.attachCanvas(canvas);
                 emulator.loadRom(romData);
-                
-                // Iniciar game loop
-                const gameLoop = () => {
+
+                // Game loop
+                const loop = () => {
                     if (emulator) {
                         emulator.advanceFrame();
                     }
-                    requestAnimationFrame(gameLoop);
+                    requestAnimationFrame(loop);
                 };
-                gameLoop();
+                loop();
 
-                updateStatus('▶️ Pokémon Fire Red', 'success');
+                status.textContent = '▶️ Pokémon Fire Red';
+                status.classList.remove('error');
+
+                // Pantalla completa en móviles
+                if (window.innerWidth < 768) {
+                    document.body.requestFullscreen?.().catch(() => {});
+                }
 
             } catch (error) {
-                console.error('Error:', error);
-                updateStatus('❌ ' + error.message, 'error');
+                console.error(error);
+                status.textContent = '❌ ' + error.message;
+                status.classList.add('error');
             }
         }
 
-        function resetGame() {
-            if (emulator) {
-                emulator.reset();
-                updateStatus('🔄 Reset', 'success');
-                setTimeout(() => updateStatus('▶️ Pokémon Fire Red', 'success'), 1000);
-            }
-        }
-
-        window.addEventListener('load', initEmulator);
-
-        document.addEventListener('touchstart', () => {
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen().catch(() => {});
-            }
-        }, { passive: true });
+        window.addEventListener('load', init);
     </script>
 </body>
 </html>
