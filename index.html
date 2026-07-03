@@ -163,7 +163,6 @@
             background: rgba(102, 126, 234, 0.9) !important;
         }
 
-        /* Controles en grid 2 líneas */
         .gamepad-grid {
             display: grid;
             grid-template-columns: 45% 45%;
@@ -200,25 +199,10 @@
             border-color: #667eea;
         }
 
-        .dpad-up {
-            grid-column: 2;
-            grid-row: 1;
-        }
-
-        .dpad-left {
-            grid-column: 1;
-            grid-row: 2;
-        }
-
-        .dpad-down {
-            grid-column: 2;
-            grid-row: 3;
-        }
-
-        .dpad-right {
-            grid-column: 3;
-            grid-row: 2;
-        }
+        .dpad-up { grid-column: 2; grid-row: 1; }
+        .dpad-left { grid-column: 1; grid-row: 2; }
+        .dpad-down { grid-column: 2; grid-row: 3; }
+        .dpad-right { grid-column: 3; grid-row: 2; }
 
         .button-pair {
             display: flex;
@@ -291,14 +275,9 @@
             border-color: #667eea;
         }
 
-        .hidden {
-            display: none !important;
-        }
-
         @media (orientation: landscape) {
             .container {
                 flex-direction: row;
-                padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
             }
 
             .header {
@@ -310,62 +289,15 @@
                 justify-content: center;
             }
 
-            h1 {
-                font-size: 0.95em;
-            }
-
-            .subtitle {
-                font-size: 0.6em;
-            }
-
-            .screen-container {
-                flex: 1;
-                padding: 4px;
-            }
-
-            .emulator-frame {
-                padding: 3px;
-                border-radius: 6px;
-            }
-
-            .controls-section {
-                flex-shrink: 0;
-                width: 110px;
-                padding: 4px;
-                gap: 4px;
-            }
-
-            .gamepad-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .dpad-container {
-                max-width: 100%;
-            }
-
-            .btn-reset {
-                font-size: 0.6em;
-                padding: 4px;
-            }
-
-            .action-btn {
-                width: 30px;
-                height: 30px;
-                font-size: 0.9em;
-            }
-
-            .status-bar {
-                padding: 2px 4px;
-                font-size: 0.6em;
-                min-height: 16px;
-            }
-        }
-
-        input[type="text"],
-        input[type="number"],
-        select,
-        textarea {
-            font-size: 16px;
+            h1 { font-size: 0.95em; }
+            .subtitle { font-size: 0.6em; }
+            .screen-container { flex: 1; padding: 4px; }
+            .emulator-frame { padding: 3px; border-radius: 6px; }
+            .controls-section { flex-shrink: 0; width: 110px; padding: 4px; gap: 4px; }
+            .gamepad-grid { grid-template-columns: 1fr; }
+            .btn-reset { font-size: 0.6em; padding: 4px; }
+            .action-btn { width: 30px; height: 30px; font-size: 0.9em; }
+            .status-bar { padding: 2px 4px; font-size: 0.6em; min-height: 16px; }
         }
     </style>
 </head>
@@ -391,41 +323,36 @@
 
             <div class="gamepad">
                 <div class="gamepad-grid">
-                    <!-- D-Pad -->
                     <div class="dpad-container">
-                        <button class="dpad-btn dpad-up" ontouchstart="padPress('up')" ontouchend="padRelease('up')" onmousedown="padPress('up')" onmouseup="padRelease('up')">⬆</button>
-                        <button class="dpad-btn dpad-left" ontouchstart="padPress('left')" ontouchend="padRelease('left')" onmousedown="padPress('left')" onmouseup="padRelease('left')">⬅</button>
-                        <button class="dpad-btn dpad-down" ontouchstart="padPress('down')" ontouchend="padRelease('down')" onmousedown="padPress('down')" onmouseup="padRelease('down')">⬇</button>
-                        <button class="dpad-btn dpad-right" ontouchstart="padPress('right')" ontouchend="padRelease('right')" onmousedown="padPress('right')" onmouseup="padRelease('right')">➡</button>
+                        <button class="dpad-btn dpad-up" ontouchstart="keyDown(0x0040)" ontouchend="keyUp(0x0040)" onmousedown="keyDown(0x0040)" onmouseup="keyUp(0x0040)">⬆</button>
+                        <button class="dpad-btn dpad-left" ontouchstart="keyDown(0x0020)" ontouchend="keyUp(0x0020)" onmousedown="keyDown(0x0020)" onmouseup="keyUp(0x0020)">⬅</button>
+                        <button class="dpad-btn dpad-down" ontouchstart="keyDown(0x0080)" ontouchend="keyUp(0x0080)" onmousedown="keyDown(0x0080)" onmouseup="keyUp(0x0080)">⬇</button>
+                        <button class="dpad-btn dpad-right" ontouchstart="keyDown(0x0010)" ontouchend="keyUp(0x0010)" onmousedown="keyDown(0x0010)" onmouseup="keyUp(0x0010)">➡</button>
                     </div>
 
-                    <!-- Botones A/B -->
                     <div class="button-pair">
-                        <button class="action-btn btn-b" ontouchstart="padPress('b')" ontouchend="padRelease('b')" onmousedown="padPress('b')" onmouseup="padRelease('b')">B</button>
-                        <button class="action-btn btn-a" ontouchstart="padPress('a')" ontouchend="padRelease('a')" onmousedown="padPress('a')" onmouseup="padRelease('a')">A</button>
+                        <button class="action-btn btn-b" ontouchstart="keyDown(0x0002)" ontouchend="keyUp(0x0002)" onmousedown="keyDown(0x0002)" onmouseup="keyUp(0x0002)">B</button>
+                        <button class="action-btn btn-a" ontouchstart="keyDown(0x0001)" ontouchend="keyUp(0x0001)" onmousedown="keyDown(0x0001)" onmouseup="keyUp(0x0001)">A</button>
                     </div>
                 </div>
 
-                <!-- L y R -->
                 <div class="shoulder-row" style="margin-top: 4px;">
-                    <button class="shoulder-btn" ontouchstart="padPress('l')" ontouchend="padRelease('l')" onmousedown="padPress('l')" onmouseup="padRelease('l')">L</button>
-                    <button class="shoulder-btn" ontouchstart="padPress('r')" ontouchend="padRelease('r')" onmousedown="padPress('r')" onmouseup="padRelease('r')">R</button>
+                    <button class="shoulder-btn" ontouchstart="keyDown(0x0200)" ontouchend="keyUp(0x0200)" onmousedown="keyDown(0x0200)" onmouseup="keyUp(0x0200)">L</button>
+                    <button class="shoulder-btn" ontouchstart="keyDown(0x0100)" ontouchend="keyUp(0x0100)" onmousedown="keyDown(0x0100)" onmouseup="keyUp(0x0100)">R</button>
                 </div>
 
-                <!-- SELECT y START -->
                 <div class="shoulder-row" style="margin-top: 4px;">
-                    <button class="shoulder-btn" ontouchstart="padPress('select')" ontouchend="padRelease('select')" onmousedown="padPress('select')" onmouseup="padRelease('select')">SEL</button>
-                    <button class="shoulder-btn" ontouchstart="padPress('start')" ontouchend="padRelease('start')" onmousedown="padPress('start')" onmouseup="padRelease('start')">STR</button>
+                    <button class="shoulder-btn" ontouchstart="keyDown(0x0004)" ontouchend="keyUp(0x0004)" onmousedown="keyDown(0x0004)" onmouseup="keyUp(0x0004)">SEL</button>
+                    <button class="shoulder-btn" ontouchstart="keyDown(0x0008)" ontouchend="keyUp(0x0008)" onmousedown="keyDown(0x0008)" onmouseup="keyUp(0x0008)">STR</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/mgba@0.10.0/dist/mgba.js"></script>
+    <script src="https://gbjs.org/gba.js"></script>
     <script>
         let emulator = null;
         const status = document.getElementById('status');
-        const romPath = 'Pokemon - FireRed Version (USA).gba';
 
         function updateStatus(message, type = 'info') {
             status.textContent = message;
@@ -439,147 +366,90 @@
             try {
                 updateStatus('⏳ Cargando ROM...', 'loading');
 
-                // Cargar la ROM desde el repositorio
-                console.log('Intentando cargar ROM desde:', romPath);
-                
-                const response = await fetch(romPath);
+                const response = await fetch('Pokemon - FireRed Version (USA).gba');
                 
                 if (!response.ok) {
-                    throw new Error(`Error HTTP: ${response.status}`);
+                    throw new Error(`Error al cargar: ${response.status}`);
                 }
 
                 const romData = await response.arrayBuffer();
-                console.log('ROM cargada, tamaño:', romData.byteLength);
-
-                // Inicializar emulador
                 const canvas = document.getElementById('gameCanvas');
+
                 emulator = new window.GameBoyAdvance();
-                
                 emulator.setCanvasScale(1);
                 emulator.attachCanvas(canvas);
-                emulator.loadBios();
+                emulator.loadRom(romData);
                 
-                // Cargar ROM
-                emulator.setRom(romData);
-                emulator.reset();
-                
-                // Loop de renderizado
-                const loop = () => {
-                    emulator.step();
-                    emulator.advanceFrame();
-                    requestAnimationFrame(loop);
+                emulator.runStable = function() {
+                    this.step();
+                    this.advanceFrame();
                 };
-                loop();
+
+                const gameLoop = () => {
+                    emulator.runStable();
+                    requestAnimationFrame(gameLoop);
+                };
+                gameLoop();
 
                 updateStatus('▶️ Pokémon Fire Red', 'success');
-                console.log('Emulador iniciado correctamente');
 
             } catch (error) {
-                console.error('Error detallado:', error);
+                console.error('Error:', error);
                 updateStatus('❌ ' + error.message, 'error');
             }
         }
 
         function resetGame() {
             if (emulator) {
-                try {
-                    emulator.reset();
-                    updateStatus('🔄 Reset completado', 'success');
-                    setTimeout(() => {
-                        updateStatus('▶️ Pokémon Fire Red', 'success');
-                    }, 1000);
-                } catch (error) {
-                    console.error('Error en reset:', error);
-                    updateStatus('❌ Error en reset', 'error');
-                }
+                emulator.reset();
+                updateStatus('🔄 Reset', 'success');
+                setTimeout(() => updateStatus('▶️ Pokémon Fire Red', 'success'), 1000);
             }
         }
 
-        function padPress(button) {
-            if (!emulator) return;
-
-            const keyMap = {
-                'a': 0x0001,
-                'b': 0x0002,
-                'select': 0x0004,
-                'start': 0x0008,
-                'right': 0x0010,
-                'left': 0x0020,
-                'up': 0x0040,
-                'down': 0x0080,
-                'r': 0x0100,
-                'l': 0x0200
-            };
-
-            if (keyMap[button]) {
-                emulator.keyDown(keyMap[button]);
-            }
+        function keyDown(key) {
+            if (emulator) emulator.keyDown(key);
         }
 
-        function padRelease(button) {
-            if (!emulator) return;
-
-            const keyMap = {
-                'a': 0x0001,
-                'b': 0x0002,
-                'select': 0x0004,
-                'start': 0x0008,
-                'right': 0x0010,
-                'left': 0x0020,
-                'up': 0x0040,
-                'down': 0x0080,
-                'r': 0x0100,
-                'l': 0x0200
-            };
-
-            if (keyMap[button]) {
-                emulator.keyUp(keyMap[button]);
-            }
+        function keyUp(key) {
+            if (emulator) emulator.keyUp(key);
         }
 
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', (e) => {
             if (!emulator) return;
-
             switch(e.key.toLowerCase()) {
-                case 'arrowup': padPress('up'); e.preventDefault(); break;
-                case 'arrowdown': padPress('down'); e.preventDefault(); break;
-                case 'arrowleft': padPress('left'); e.preventDefault(); break;
-                case 'arrowright': padPress('right'); e.preventDefault(); break;
-                case 'z': padPress('a'); break;
-                case 'x': padPress('b'); break;
-                case 'q': padPress('l'); break;
-                case 'w': padPress('r'); break;
-                case 'enter': padPress('start'); break;
-                case ' ': padPress('select'); e.preventDefault(); break;
+                case 'arrowup': keyDown(0x0040); break;
+                case 'arrowdown': keyDown(0x0080); break;
+                case 'arrowleft': keyDown(0x0020); break;
+                case 'arrowright': keyDown(0x0010); break;
+                case 'z': keyDown(0x0001); break;
+                case 'x': keyDown(0x0002); break;
+                case 'q': keyDown(0x0200); break;
+                case 'w': keyDown(0x0100); break;
+                case 'enter': keyDown(0x0008); break;
+                case ' ': keyDown(0x0004); e.preventDefault(); break;
             }
         });
 
-        document.addEventListener('keyup', function(e) {
+        document.addEventListener('keyup', (e) => {
             if (!emulator) return;
-
             switch(e.key.toLowerCase()) {
-                case 'arrowup': padRelease('up'); break;
-                case 'arrowdown': padRelease('down'); break;
-                case 'arrowleft': padRelease('left'); break;
-                case 'arrowright': padRelease('right'); break;
-                case 'z': padRelease('a'); break;
-                case 'x': padRelease('b'); break;
-                case 'q': padRelease('l'); break;
-                case 'w': padRelease('r'); break;
-                case 'enter': padRelease('start'); break;
-                case ' ': padRelease('select'); break;
+                case 'arrowup': keyUp(0x0040); break;
+                case 'arrowdown': keyUp(0x0080); break;
+                case 'arrowleft': keyUp(0x0020); break;
+                case 'arrowright': keyUp(0x0010); break;
+                case 'z': keyUp(0x0001); break;
+                case 'x': keyUp(0x0002); break;
+                case 'q': keyUp(0x0200); break;
+                case 'w': keyUp(0x0100); break;
+                case 'enter': keyUp(0x0008); break;
+                case ' ': keyUp(0x0004); break;
             }
         });
-
-        document.addEventListener('touchmove', function(e) {
-            if (e.touches.length > 1) {
-                e.preventDefault();
-            }
-        }, { passive: false });
 
         window.addEventListener('load', initEmulator);
 
-        document.addEventListener('touchstart', function() {
+        document.addEventListener('touchstart', () => {
             if (document.documentElement.requestFullscreen) {
                 document.documentElement.requestFullscreen().catch(() => {});
             }
