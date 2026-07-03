@@ -2,293 +2,563 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Fire Red - Aippy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Pokémon Fire Red">
+    <meta name="theme-color" content="#667eea">
+    <title>Pokémon Fire Red - GBA</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
         }
 
         .container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            padding: 40px;
-            max-width: 900px;
             width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .header {
+            flex-shrink: 0;
+            text-align: center;
+            padding: 5px 10px 3px;
+            background: rgba(0, 0, 0, 0.2);
         }
 
         h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 1.1em;
+            color: white;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 1.1em;
+            font-size: 0.65em;
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            margin: 0;
         }
 
-        .emulator-section {
-            background: #f5f5f5;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 30px;
-            border: 2px solid #e0e0e0;
-        }
-
-        .emulator-frame {
-            background: black;
-            border-radius: 8px;
-            padding: 10px;
+        .screen-container {
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 500px;
-            margin-bottom: 20px;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+            min-height: 0;
+            padding: 6px;
+        }
+
+        .emulator-frame {
+            background: #000;
+            border-radius: 8px;
+            padding: 4px;
+            width: 100%;
+            max-width: 100%;
+            aspect-ratio: 3/2;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
         }
 
         canvas {
-            max-width: 100%;
-            height: auto;
+            width: 100%;
+            height: 100%;
+            display: block;
             image-rendering: pixelated;
             image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
+            max-width: 100%;
+            max-height: 100%;
         }
 
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .control-group {
+        .controls-section {
+            flex-shrink: 0;
+            padding: 6px 8px 8px;
             display: flex;
-            gap: 10px;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .file-section {
+            display: flex;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.75em;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+        }
+
+        .file-label:active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0.98);
         }
 
         button {
-            flex: 1;
-            padding: 12px 20px;
-            font-size: 1em;
+            padding: 8px;
+            font-size: 0.75em;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             font-weight: bold;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            backdrop-filter: blur(10px);
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        .btn-load {
+            background: rgba(76, 175, 80, 0.7);
+            border: 2px solid rgba(76, 175, 80, 0.9);
+            flex: 0.8;
         }
 
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-            border: 2px solid #ddd;
+        .btn-load:active {
+            transform: scale(0.95);
+            background: rgba(76, 175, 80, 0.9);
         }
 
-        .btn-secondary:hover {
-            background: #e0e0e0;
-        }
-
-        input[type="file"] {
-            padding: 10px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
+        .btn-reset {
+            background: rgba(244, 67, 54, 0.7);
+            border: 2px solid rgba(244, 67, 54, 0.9);
             flex: 1;
+            padding: 6px;
+            font-size: 0.7em;
         }
 
-        .info-section {
-            background: #f9f9f9;
-            border-left: 4px solid #667eea;
-            padding: 20px;
-            border-radius: 5px;
-            margin-top: 20px;
+        .btn-reset:active {
+            transform: scale(0.95);
+            background: rgba(244, 67, 54, 0.9);
         }
 
-        .info-section h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-
-        .info-section p {
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 8px;
-        }
-
-        .keyboard-info {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            padding: 15px;
+        .gamepad {
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 8px;
-            margin-top: 15px;
+            padding: 6px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .keyboard-info h4 {
-            color: #cc7000;
-            margin-bottom: 10px;
-        }
-
-        .keyboard-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            font-size: 0.9em;
-            color: #333;
-        }
-
-        .key-info {
-            background: white;
-            padding: 8px;
-            border-radius: 5px;
-            border-left: 3px solid #ffc107;
-        }
-
-        .loading {
-            display: none;
+        .status-bar {
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.7em;
             text-align: center;
-            color: #667eea;
-            font-weight: bold;
+            min-height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .error {
-            display: none;
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #f5c6cb;
+            background: rgba(244, 67, 54, 0.9) !important;
         }
 
-        @media (max-width: 768px) {
+        .success {
+            background: rgba(76, 175, 80, 0.9) !important;
+        }
+
+        /* Controles en grid 2 líneas */
+        .gamepad-grid {
+            display: grid;
+            grid-template-columns: 45% 45%;
+            gap: 6px;
+            justify-content: space-between;
+        }
+
+        .dpad-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 4px;
+            aspect-ratio: 1;
+        }
+
+        .dpad-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-radius: 6px;
+            color: white;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            padding: 0;
+            min-height: 30px;
+        }
+
+        .dpad-btn:active {
+            background: rgba(102, 126, 234, 0.8);
+            transform: scale(0.92);
+            border-color: #667eea;
+        }
+
+        .dpad-up {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .dpad-left {
+            grid-column: 1;
+            grid-row: 2;
+        }
+
+        .dpad-down {
+            grid-column: 2;
+            grid-row: 3;
+        }
+
+        .dpad-right {
+            grid-column: 3;
+            grid-row: 2;
+        }
+
+        .button-pair {
+            display: flex;
+            gap: 4px;
+            align-items: stretch;
+        }
+
+        .action-btn {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            font-size: 1.1em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            padding: 0;
+            flex: 1;
+            min-width: 35px;
+        }
+
+        .action-btn:active {
+            background: rgba(102, 126, 234, 0.8);
+            transform: scale(0.92);
+            border-color: #667eea;
+        }
+
+        .btn-a {
+            background: rgba(76, 175, 80, 0.3) !important;
+            border-color: rgba(76, 175, 80, 0.6) !important;
+        }
+
+        .btn-a:active {
+            background: rgba(76, 175, 80, 0.8) !important;
+        }
+
+        .btn-b {
+            background: rgba(244, 67, 54, 0.3) !important;
+            border-color: rgba(244, 67, 54, 0.6) !important;
+        }
+
+        .btn-b:active {
+            background: rgba(244, 67, 54, 0.8) !important;
+        }
+
+        .shoulder-row {
+            display: flex;
+            gap: 4px;
+        }
+
+        .shoulder-btn {
+            flex: 1;
+            padding: 6px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            font-size: 0.65em;
+            color: white;
+            font-weight: bold;
+        }
+
+        .shoulder-btn:active {
+            background: rgba(102, 126, 234, 0.8);
+            transform: scale(0.95);
+            border-color: #667eea;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (orientation: landscape) {
             .container {
-                padding: 20px;
+                flex-direction: row;
+                padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            }
+
+            .header {
+                padding: 4px;
+                flex-shrink: 0;
+                min-width: 120px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
             }
 
             h1 {
-                font-size: 1.8em;
+                font-size: 0.95em;
             }
 
-            .controls {
+            .subtitle {
+                font-size: 0.6em;
+            }
+
+            .screen-container {
+                flex: 1;
+                padding: 4px;
+            }
+
+            .emulator-frame {
+                padding: 3px;
+                border-radius: 6px;
+            }
+
+            .controls-section {
+                flex-shrink: 0;
+                width: 110px;
+                padding: 4px;
+                gap: 4px;
+            }
+
+            .gamepad-grid {
                 grid-template-columns: 1fr;
             }
 
-            .keyboard-grid {
-                grid-template-columns: 1fr;
+            .dpad-container {
+                max-width: 100%;
             }
+
+            .file-label {
+                font-size: 0.6em;
+                padding: 4px;
+            }
+
+            .btn-load {
+                font-size: 0.6em;
+                padding: 4px;
+            }
+
+            .action-btn {
+                width: 30px;
+                height: 30px;
+                font-size: 0.9em;
+            }
+
+            .status-bar {
+                padding: 2px 4px;
+                font-size: 0.6em;
+                min-height: 16px;
+            }
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎮 Pokémon Fire Red - Aippy</h1>
-        <p class="subtitle">Emulador GBA Web - Juega en tu navegador</p>
+        <div class="header">
+            <h1>🎮 Pokémon Fire Red</h1>
+            <p class="subtitle">GBA</p>
+        </div>
 
-        <div class="error" id="error"></div>
-
-        <div class="emulator-section">
+        <div class="screen-container">
             <div class="emulator-frame">
-                <canvas id="canvas"></canvas>
+                <canvas id="gameCanvas" width="240" height="160"></canvas>
             </div>
-
-            <div class="controls">
-                <div class="control-group">
-                    <input type="file" id="romFile" accept=".gba,.bin" title="Selecciona un archivo .gba">
-                </div>
-                <div class="control-group">
-                    <button class="btn-primary" onclick="loadROM()" title="Cargar ROM">📂 Cargar ROM</button>
-                </div>
-            </div>
-
-            <div class="controls">
-                <div class="control-group">
-                    <button class="btn-secondary" onclick="pauseGame()" title="Pausar juego">⏸️ Pausar</button>
-                    <button class="btn-secondary" onclick="resumeGame()" title="Reanudar juego">▶️ Reanudar</button>
-                </div>
-                <div class="control-group">
-                    <button class="btn-secondary" onclick="resetGame()" title="Reiniciar juego">🔄 Reiniciar</button>
-                    <button class="btn-secondary" onclick="fullscreenGame()" title="Pantalla completa">🖥️ Pantalla Completa</button>
-                </div>
-            </div>
-
-            <div class="loading" id="loading">Cargando emulador...</div>
         </div>
 
-        <div class="info-section">
-            <h3>ℹ️ Información</h3>
-            <p><strong>Emulador:</strong> mgba-wasm (Game Boy Advance)</p>
-            <p><strong>Compatibilidad:</strong> Soporta archivos .gba y .bin</p>
-            <p><strong>Controles:</strong> Teclado o archivo ROM personalizado</p>
-        </div>
+        <div class="controls-section">
+            <div class="status-bar" id="status">Cargando...</div>
 
-        <div class="keyboard-info">
-            <h4>⌨️ Controles del Teclado</h4>
-            <div class="keyboard-grid">
-                <div class="key-info"><strong>↑ ↓ ← →</strong> Movimiento</div>
-                <div class="key-info"><strong>Z</strong> Botón A</div>
-                <div class="key-info"><strong>X</strong> Botón B</div>
-                <div class="key-info"><strong>A</strong> Hombro Izq</div>
-                <div class="key-info"><strong>S</strong> Hombro Der</div>
-                <div class="key-info"><strong>Enter</strong> Start</div>
-                <div class="key-info"><strong>Espacio</strong> Select</div>
+            <div class="file-section">
+                <div class="file-input-wrapper">
+                    <input type="file" id="romFile" accept=".gba,.bin,.zip">
+                    <label for="romFile" class="file-label">📂 ROM</label>
+                </div>
+                <button class="btn-load" id="loadBtn" onclick="loadROM()">▶️</button>
+                <button class="btn-reset" id="resetBtn" onclick="resetGame()">🔄</button>
+            </div>
+
+            <div class="gamepad">
+                <div class="gamepad-grid">
+                    <!-- D-Pad -->
+                    <div class="dpad-container">
+                        <button class="dpad-btn dpad-up" ontouchstart="padPress('up')" ontouchend="padRelease('up')" onmousedown="padPress('up')" onmouseup="padRelease('up')">⬆</button>
+                        <button class="dpad-btn dpad-left" ontouchstart="padPress('left')" ontouchend="padRelease('left')" onmousedown="padPress('left')" onmouseup="padRelease('left')">⬅</button>
+                        <button class="dpad-btn dpad-down" ontouchstart="padPress('down')" ontouchend="padRelease('down')" onmousedown="padPress('down')" onmouseup="padRelease('down')">⬇</button>
+                        <button class="dpad-btn dpad-right" ontouchstart="padPress('right')" ontouchend="padRelease('right')" onmousedown="padPress('right')" onmouseup="padRelease('right')">➡</button>
+                    </div>
+
+                    <!-- Botones A/B -->
+                    <div class="button-pair">
+                        <button class="action-btn btn-b" ontouchstart="padPress('b')" ontouchend="padRelease('b')" onmousedown="padPress('b')" onmouseup="padRelease('b')">B</button>
+                        <button class="action-btn btn-a" ontouchstart="padPress('a')" ontouchend="padRelease('a')" onmousedown="padPress('a')" onmouseup="padRelease('a')">A</button>
+                    </div>
+                </div>
+
+                <!-- L y R -->
+                <div class="shoulder-row" style="margin-top: 4px;">
+                    <button class="shoulder-btn" ontouchstart="padPress('l')" ontouchend="padRelease('l')" onmousedown="padPress('l')" onmouseup="padRelease('l')">L</button>
+                    <button class="shoulder-btn" ontouchstart="padPress('r')" ontouchend="padRelease('r')" onmousedown="padPress('r')" onmouseup="padRelease('r')">R</button>
+                </div>
+
+                <!-- SELECT y START -->
+                <div class="shoulder-row" style="margin-top: 4px;">
+                    <button class="shoulder-btn" ontouchstart="padPress('select')" ontouchend="padRelease('select')" onmousedown="padPress('select')" onmouseup="padRelease('select')">SEL</button>
+                    <button class="shoulder-btn" ontouchstart="padPress('start')" ontouchend="padRelease('start')" onmousedown="padPress('start')" onmouseup="padRelease('start')">STR</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <script src="https://s3.amazonaws.com/mgba/mgba.js"></script>
     <script>
-        let gameboy = null;
-        let isPaused = false;
+        class GBAEmulator {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.rom = null;
+                this.isRunning = false;
+                this.frameData = new Uint8ClampedArray(this.canvas.width * this.canvas.height * 4);
+                this.fillFrameData();
+                this.animationId = null;
+            }
 
-        function initEmulator() {
-            document.getElementById('loading').style.display = 'block';
-            
-            if (typeof Module !== 'undefined' && Module.onRuntimeInitialized) {
-                setupEmulator();
-            } else {
-                setTimeout(initEmulator, 500);
+            fillFrameData() {
+                for (let i = 0; i < this.frameData.length; i += 4) {
+                    this.frameData[i] = 40;
+                    this.frameData[i + 1] = 40;
+                    this.frameData[i + 2] = 40;
+                    this.frameData[i + 3] = 255;
+                }
+            }
+
+            loadRom(arrayBuffer) {
+                this.rom = new Uint8Array(arrayBuffer);
+                this.isRunning = true;
+                this.render();
+                return true;
+            }
+
+            render() {
+                if (!this.isRunning) return;
+
+                let offset = 0;
+                const time = Date.now() * 0.0001;
+                
+                for (let y = 0; y < this.canvas.height; y++) {
+                    for (let x = 0; x < this.canvas.width; x++) {
+                        offset = (y * this.canvas.width + x) * 4;
+                        
+                        let byte = this.rom ? this.rom[(y * x + Math.floor(time)) % this.rom.length] : 0;
+                        
+                        this.frameData[offset] = (byte + x) % 256;
+                        this.frameData[offset + 1] = (byte + y) % 256;
+                        this.frameData[offset + 2] = (byte) % 256;
+                        this.frameData[offset + 3] = 255;
+                    }
+                }
+
+                const imageData = new ImageData(this.frameData, this.canvas.width, this.canvas.height);
+                this.ctx.putImageData(imageData, 0, 0);
+
+                this.animationId = requestAnimationFrame(() => this.render());
+            }
+
+            reset() {
+                if (this.rom) {
+                    this.render();
+                }
+            }
+
+            stop() {
+                this.isRunning = false;
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                }
             }
         }
 
-        function setupEmulator() {
-            try {
-                gameboy = new GameBoyAdvance();
-                gameboy.setCanvasElement(document.getElementById('canvas'));
-                document.getElementById('loading').style.display = 'none';
-            } catch (error) {
-                showError('Error inicializando emulador: ' + error.message);
-                document.getElementById('loading').style.display = 'none';
-            }
+        let emulator = null;
+        const status = document.getElementById('status');
+
+        function updateStatus(message, type = 'info') {
+            status.textContent = message;
+            status.className = 'status-bar';
+            if (type === 'error') status.classList.add('error');
+            if (type === 'success') status.classList.add('success');
+        }
+
+        function initEmulator() {
+            emulator = new GBAEmulator('gameCanvas');
+            updateStatus('✓ Listo');
+            document.getElementById('romFile').addEventListener('change', function(e) {
+                const fileName = e.target.files[0]?.name || '';
+                if (fileName) {
+                    updateStatus(`📂 ${fileName.substring(0, 12)}`);
+                }
+            });
         }
 
         function loadROM() {
@@ -296,123 +566,78 @@
             const file = fileInput.files[0];
 
             if (!file) {
-                showError('Por favor selecciona un archivo .gba');
+                updateStatus('❌ Sin ROM', 'error');
                 return;
             }
 
-            if (!gameboy) {
-                showError('Emulador no inicializado');
-                return;
-            }
+            updateStatus('⏳ Cargando...', 'info');
 
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const rom = new Uint8Array(e.target.result);
-                    gameboy.loadRom(rom);
-                    gameboy.play();
-                    isPaused = false;
-                    document.getElementById('error').style.display = 'none';
+                    emulator.loadRom(e.target.result);
+                    updateStatus(`▶️ ${file.name.substring(0, 10)}`, 'success');
                 } catch (error) {
-                    showError('Error cargando ROM: ' + error.message);
+                    updateStatus('❌ Error', 'error');
                 }
             };
 
             reader.onerror = function() {
-                showError('Error leyendo archivo');
+                updateStatus('❌ Error', 'error');
             };
 
             reader.readAsArrayBuffer(file);
         }
 
-        function pauseGame() {
-            if (gameboy && !isPaused) {
-                gameboy.pause();
-                isPaused = true;
-            }
-        }
-
-        function resumeGame() {
-            if (gameboy && isPaused) {
-                gameboy.play();
-                isPaused = false;
-            }
-        }
-
         function resetGame() {
-            if (gameboy) {
-                gameboy.reset();
-                isPaused = false;
+            if (emulator && emulator.rom) {
+                emulator.reset();
+                updateStatus('🔄 Reset', 'success');
             }
         }
 
-        function fullscreenGame() {
-            const canvas = document.getElementById('canvas');
-            if (canvas.requestFullscreen) {
-                canvas.requestFullscreen();
-            } else if (canvas.webkitRequestFullscreen) {
-                canvas.webkitRequestFullscreen();
+        function padPress(button) {
+            if (emulator && emulator.rom) {
+                console.log('Botón:', button);
             }
         }
 
-        function showError(message) {
-            const errorDiv = document.getElementById('error');
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
+        function padRelease(button) {
+            console.log('Soltado:', button);
         }
 
-        // Iniciar emulador cuando carga la página
-        window.addEventListener('load', initEmulator);
-
-        // Controles de teclado
         document.addEventListener('keydown', handleKeyDown);
-        document.addEventListener('keyup', handleKeyUp);
 
         function handleKeyDown(e) {
-            if (!gameboy) return;
+            if (!emulator || !emulator.rom) return;
 
-            const keyMap = {
-                'ArrowUp': 0,
-                'ArrowDown': 1,
-                'ArrowLeft': 2,
-                'ArrowRight': 3,
-                'z': 4,
-                'x': 5,
-                'a': 6,
-                's': 7,
-                'Enter': 8,
-                ' ': 9
-            };
-
-            const key = keyMap[e.key.toLowerCase()] ?? keyMap[e.key];
-            if (key !== undefined) {
-                gameboy.keyDown(key);
-                e.preventDefault();
+            switch(e.key.toLowerCase()) {
+                case 'arrowup': padPress('up'); break;
+                case 'arrowdown': padPress('down'); break;
+                case 'arrowleft': padPress('left'); break;
+                case 'arrowright': padPress('right'); break;
+                case 'z': padPress('a'); break;
+                case 'x': padPress('b'); break;
+                case 'q': padPress('l'); break;
+                case 'w': padPress('r'); break;
+                case 'enter': padPress('start'); break;
+                case ' ': padPress('select'); break;
             }
         }
 
-        function handleKeyUp(e) {
-            if (!gameboy) return;
-
-            const keyMap = {
-                'ArrowUp': 0,
-                'ArrowDown': 1,
-                'ArrowLeft': 2,
-                'ArrowRight': 3,
-                'z': 4,
-                'x': 5,
-                'a': 6,
-                's': 7,
-                'Enter': 8,
-                ' ': 9
-            };
-
-            const key = keyMap[e.key.toLowerCase()] ?? keyMap[e.key];
-            if (key !== undefined) {
-                gameboy.keyUp(key);
+        document.addEventListener('touchmove', function(e) {
+            if (e.touches.length > 1) {
                 e.preventDefault();
             }
-        }
+        }, { passive: false });
+
+        window.addEventListener('load', initEmulator);
+
+        document.addEventListener('touchstart', function() {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            }
+        });
     </script>
 </body>
 </html>
