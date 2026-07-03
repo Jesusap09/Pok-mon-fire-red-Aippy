@@ -159,6 +159,10 @@
             background: rgba(76, 175, 80, 0.9) !important;
         }
 
+        .loading {
+            background: rgba(102, 126, 234, 0.9) !important;
+        }
+
         /* Controles en grid 2 líneas */
         .gamepad-grid {
             display: grid;
@@ -379,7 +383,7 @@
         </div>
 
         <div class="controls-section">
-            <div class="status-bar" id="status">Cargando ROM...</div>
+            <div class="status-bar" id="status">⏳ Cargando ROM...</div>
 
             <div class="file-section">
                 <button class="btn-reset" id="resetBtn" onclick="resetGame()">🔄 Reset</button>
@@ -417,49 +421,62 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/mgba-wasm@0.10.3/dist/mgba.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mgba@0.10.0/dist/mgba.js"></script>
     <script>
         let emulator = null;
         const status = document.getElementById('status');
+        const romPath = 'Pokemon - FireRed Version (USA).gba';
 
         function updateStatus(message, type = 'info') {
             status.textContent = message;
             status.className = 'status-bar';
             if (type === 'error') status.classList.add('error');
             if (type === 'success') status.classList.add('success');
+            if (type === 'loading') status.classList.add('loading');
         }
 
         async function initEmulator() {
             try {
-                // Cargar WASM
-                const EmuCore = await window.MGBAEmulator.EmuCore;
+                updateStatus('⏳ Cargando ROM...', 'loading');
+
+                // Cargar la ROM desde el repositorio
+                console.log('Intentando cargar ROM desde:', romPath);
                 
-                // Obtener la ROM
-                const response = await fetch('Pokemon - FireRed Version (USA).gba');
+                const response = await fetch(romPath);
+                
                 if (!response.ok) {
-                    throw new Error('No se pudo cargar la ROM del repositorio');
+                    throw new Error(`Error HTTP: ${response.status}`);
                 }
-                
-                const romBuffer = await response.arrayBuffer();
-                
+
+                const romData = await response.arrayBuffer();
+                console.log('ROM cargada, tamaño:', romData.byteLength);
+
                 // Inicializar emulador
-                emulator = new EmuCore();
                 const canvas = document.getElementById('gameCanvas');
+                emulator = new window.GameBoyAdvance();
                 
+                emulator.setCanvasScale(1);
                 emulator.attachCanvas(canvas);
-                emulator.loadRom(new Uint8Array(romBuffer));
+                emulator.loadBios();
                 
-                emulator.runFrame();
+                // Cargar ROM
+                emulator.setRom(romData);
+                emulator.reset();
+                
+                // Loop de renderizado
                 const loop = () => {
-                    emulator.runFrame();
+                    emulator.step();
+                    emulator.advanceFrame();
                     requestAnimationFrame(loop);
                 };
                 loop();
-                
+
                 updateStatus('▶️ Pokémon Fire Red', 'success');
+                console.log('Emulador iniciado correctamente');
+
             } catch (error) {
-                console.error('Error al inicializar emulador:', error);
-                updateStatus('❌ Error: ' + error.message, 'error');
+                console.error('Error detallado:', error);
+                updateStatus('❌ ' + error.message, 'error');
             }
         }
 
@@ -467,9 +484,13 @@
             if (emulator) {
                 try {
                     emulator.reset();
-                    updateStatus('🔄 Reset', 'success');
+                    updateStatus('🔄 Reset completado', 'success');
+                    setTimeout(() => {
+                        updateStatus('▶️ Pokémon Fire Red', 'success');
+                    }, 1000);
                 } catch (error) {
                     console.error('Error en reset:', error);
+                    updateStatus('❌ Error en reset', 'error');
                 }
             }
         }
@@ -478,20 +499,20 @@
             if (!emulator) return;
 
             const keyMap = {
-                'up': 0x0001,
-                'down': 0x0002,
-                'left': 0x0004,
-                'right': 0x0008,
-                'a': 0x0001 << 8,
-                'b': 0x0002 << 8,
-                'l': 0x0100,
-                'r': 0x0200,
-                'start': 0x0008 << 8,
-                'select': 0x0004 << 8
+                'a': 0x0001,
+                'b': 0x0002,
+                'select': 0x0004,
+                'start': 0x0008,
+                'right': 0x0010,
+                'left': 0x0020,
+                'up': 0x0040,
+                'down': 0x0080,
+                'r': 0x0100,
+                'l': 0x0200
             };
 
             if (keyMap[button]) {
-                emulator.setKey(keyMap[button], true);
+                emulator.keyDown(keyMap[button]);
             }
         }
 
@@ -499,20 +520,20 @@
             if (!emulator) return;
 
             const keyMap = {
-                'up': 0x0001,
-                'down': 0x0002,
-                'left': 0x0004,
-                'right': 0x0008,
-                'a': 0x0001 << 8,
-                'b': 0x0002 << 8,
-                'l': 0x0100,
-                'r': 0x0200,
-                'start': 0x0008 << 8,
-                'select': 0x0004 << 8
+                'a': 0x0001,
+                'b': 0x0002,
+                'select': 0x0004,
+                'start': 0x0008,
+                'right': 0x0010,
+                'left': 0x0020,
+                'up': 0x0040,
+                'down': 0x0080,
+                'r': 0x0100,
+                'l': 0x0200
             };
 
             if (keyMap[button]) {
-                emulator.setKey(keyMap[button], false);
+                emulator.keyUp(keyMap[button]);
             }
         }
 
