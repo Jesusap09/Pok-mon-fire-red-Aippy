@@ -105,41 +105,6 @@
             width: 100%;
         }
 
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            flex: 1;
-            display: flex;
-            align-items: center;
-        }
-
-        .file-input-wrapper input[type="file"] {
-            position: absolute;
-            left: -9999px;
-        }
-
-        .file-label {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 8px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.75em;
-            font-weight: bold;
-            backdrop-filter: blur(10px);
-        }
-
-        .file-label:active {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(0.98);
-        }
-
         button {
             padding: 8px;
             font-size: 0.75em;
@@ -150,17 +115,6 @@
             font-weight: bold;
             color: white;
             backdrop-filter: blur(10px);
-        }
-
-        .btn-load {
-            background: rgba(76, 175, 80, 0.7);
-            border: 2px solid rgba(76, 175, 80, 0.9);
-            flex: 0.8;
-        }
-
-        .btn-load:active {
-            transform: scale(0.95);
-            background: rgba(76, 175, 80, 0.9);
         }
 
         .btn-reset {
@@ -385,12 +339,7 @@
                 max-width: 100%;
             }
 
-            .file-label {
-                font-size: 0.6em;
-                padding: 4px;
-            }
-
-            .btn-load {
+            .btn-reset {
                 font-size: 0.6em;
                 padding: 4px;
             }
@@ -430,15 +379,10 @@
         </div>
 
         <div class="controls-section">
-            <div class="status-bar" id="status">Cargando...</div>
+            <div class="status-bar" id="status">Cargando ROM...</div>
 
             <div class="file-section">
-                <div class="file-input-wrapper">
-                    <input type="file" id="romFile" accept=".gba,.bin,.zip">
-                    <label for="romFile" class="file-label">📂 ROM</label>
-                </div>
-                <button class="btn-load" id="loadBtn" onclick="loadROM()">▶️</button>
-                <button class="btn-reset" id="resetBtn" onclick="resetGame()">🔄</button>
+                <button class="btn-reset" id="resetBtn" onclick="resetGame()">🔄 Reset</button>
             </div>
 
             <div class="gamepad">
@@ -473,73 +417,8 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/mgba-wasm@0.10.3/dist/mgba.js"></script>
     <script>
-        class GBAEmulator {
-            constructor(canvasId) {
-                this.canvas = document.getElementById(canvasId);
-                this.ctx = this.canvas.getContext('2d');
-                this.rom = null;
-                this.isRunning = false;
-                this.frameData = new Uint8ClampedArray(this.canvas.width * this.canvas.height * 4);
-                this.fillFrameData();
-                this.animationId = null;
-            }
-
-            fillFrameData() {
-                for (let i = 0; i < this.frameData.length; i += 4) {
-                    this.frameData[i] = 40;
-                    this.frameData[i + 1] = 40;
-                    this.frameData[i + 2] = 40;
-                    this.frameData[i + 3] = 255;
-                }
-            }
-
-            loadRom(arrayBuffer) {
-                this.rom = new Uint8Array(arrayBuffer);
-                this.isRunning = true;
-                this.render();
-                return true;
-            }
-
-            render() {
-                if (!this.isRunning) return;
-
-                let offset = 0;
-                const time = Date.now() * 0.0001;
-                
-                for (let y = 0; y < this.canvas.height; y++) {
-                    for (let x = 0; x < this.canvas.width; x++) {
-                        offset = (y * this.canvas.width + x) * 4;
-                        
-                        let byte = this.rom ? this.rom[(y * x + Math.floor(time)) % this.rom.length] : 0;
-                        
-                        this.frameData[offset] = (byte + x) % 256;
-                        this.frameData[offset + 1] = (byte + y) % 256;
-                        this.frameData[offset + 2] = (byte) % 256;
-                        this.frameData[offset + 3] = 255;
-                    }
-                }
-
-                const imageData = new ImageData(this.frameData, this.canvas.width, this.canvas.height);
-                this.ctx.putImageData(imageData, 0, 0);
-
-                this.animationId = requestAnimationFrame(() => this.render());
-            }
-
-            reset() {
-                if (this.rom) {
-                    this.render();
-                }
-            }
-
-            stop() {
-                this.isRunning = false;
-                if (this.animationId) {
-                    cancelAnimationFrame(this.animationId);
-                }
-            }
-        }
-
         let emulator = null;
         const status = document.getElementById('status');
 
@@ -550,80 +429,126 @@
             if (type === 'success') status.classList.add('success');
         }
 
-        function initEmulator() {
-            emulator = new GBAEmulator('gameCanvas');
-            updateStatus('✓ Listo');
-            document.getElementById('romFile').addEventListener('change', function(e) {
-                const fileName = e.target.files[0]?.name || '';
-                if (fileName) {
-                    updateStatus(`📂 ${fileName.substring(0, 12)}`);
+        async function initEmulator() {
+            try {
+                // Cargar WASM
+                const EmuCore = await window.MGBAEmulator.EmuCore;
+                
+                // Obtener la ROM
+                const response = await fetch('Pokemon - FireRed Version (USA).gba');
+                if (!response.ok) {
+                    throw new Error('No se pudo cargar la ROM del repositorio');
                 }
-            });
-        }
-
-        function loadROM() {
-            const fileInput = document.getElementById('romFile');
-            const file = fileInput.files[0];
-
-            if (!file) {
-                updateStatus('❌ Sin ROM', 'error');
-                return;
+                
+                const romBuffer = await response.arrayBuffer();
+                
+                // Inicializar emulador
+                emulator = new EmuCore();
+                const canvas = document.getElementById('gameCanvas');
+                
+                emulator.attachCanvas(canvas);
+                emulator.loadRom(new Uint8Array(romBuffer));
+                
+                emulator.runFrame();
+                const loop = () => {
+                    emulator.runFrame();
+                    requestAnimationFrame(loop);
+                };
+                loop();
+                
+                updateStatus('▶️ Pokémon Fire Red', 'success');
+            } catch (error) {
+                console.error('Error al inicializar emulador:', error);
+                updateStatus('❌ Error: ' + error.message, 'error');
             }
-
-            updateStatus('⏳ Cargando...', 'info');
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    emulator.loadRom(e.target.result);
-                    updateStatus(`▶️ ${file.name.substring(0, 10)}`, 'success');
-                } catch (error) {
-                    updateStatus('❌ Error', 'error');
-                }
-            };
-
-            reader.onerror = function() {
-                updateStatus('❌ Error', 'error');
-            };
-
-            reader.readAsArrayBuffer(file);
         }
 
         function resetGame() {
-            if (emulator && emulator.rom) {
-                emulator.reset();
-                updateStatus('🔄 Reset', 'success');
+            if (emulator) {
+                try {
+                    emulator.reset();
+                    updateStatus('🔄 Reset', 'success');
+                } catch (error) {
+                    console.error('Error en reset:', error);
+                }
             }
         }
 
         function padPress(button) {
-            if (emulator && emulator.rom) {
-                console.log('Botón:', button);
+            if (!emulator) return;
+
+            const keyMap = {
+                'up': 0x0001,
+                'down': 0x0002,
+                'left': 0x0004,
+                'right': 0x0008,
+                'a': 0x0001 << 8,
+                'b': 0x0002 << 8,
+                'l': 0x0100,
+                'r': 0x0200,
+                'start': 0x0008 << 8,
+                'select': 0x0004 << 8
+            };
+
+            if (keyMap[button]) {
+                emulator.setKey(keyMap[button], true);
             }
         }
 
         function padRelease(button) {
-            console.log('Soltado:', button);
+            if (!emulator) return;
+
+            const keyMap = {
+                'up': 0x0001,
+                'down': 0x0002,
+                'left': 0x0004,
+                'right': 0x0008,
+                'a': 0x0001 << 8,
+                'b': 0x0002 << 8,
+                'l': 0x0100,
+                'r': 0x0200,
+                'start': 0x0008 << 8,
+                'select': 0x0004 << 8
+            };
+
+            if (keyMap[button]) {
+                emulator.setKey(keyMap[button], false);
+            }
         }
 
-        document.addEventListener('keydown', handleKeyDown);
-
-        function handleKeyDown(e) {
-            if (!emulator || !emulator.rom) return;
+        document.addEventListener('keydown', function(e) {
+            if (!emulator) return;
 
             switch(e.key.toLowerCase()) {
-                case 'arrowup': padPress('up'); break;
-                case 'arrowdown': padPress('down'); break;
-                case 'arrowleft': padPress('left'); break;
-                case 'arrowright': padPress('right'); break;
+                case 'arrowup': padPress('up'); e.preventDefault(); break;
+                case 'arrowdown': padPress('down'); e.preventDefault(); break;
+                case 'arrowleft': padPress('left'); e.preventDefault(); break;
+                case 'arrowright': padPress('right'); e.preventDefault(); break;
                 case 'z': padPress('a'); break;
                 case 'x': padPress('b'); break;
                 case 'q': padPress('l'); break;
                 case 'w': padPress('r'); break;
                 case 'enter': padPress('start'); break;
-                case ' ': padPress('select'); break;
+                case ' ': padPress('select'); e.preventDefault(); break;
             }
-        }
+        });
+
+        document.addEventListener('keyup', function(e) {
+            if (!emulator) return;
+
+            switch(e.key.toLowerCase()) {
+                case 'arrowup': padRelease('up'); break;
+                case 'arrowdown': padRelease('down'); break;
+                case 'arrowleft': padRelease('left'); break;
+                case 'arrowright': padRelease('right'); break;
+                case 'z': padRelease('a'); break;
+                case 'x': padRelease('b'); break;
+                case 'q': padRelease('l'); break;
+                case 'w': padRelease('r'); break;
+                case 'enter': padRelease('start'); break;
+                case ' ': padRelease('select'); break;
+            }
+        });
 
         document.addEventListener('touchmove', function(e) {
             if (e.touches.length > 1) {
