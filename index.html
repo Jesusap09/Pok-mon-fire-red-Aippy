@@ -191,6 +191,7 @@
             transition: all 0.1s ease;
             padding: 0;
             min-height: 30px;
+            user-select: none;
         }
 
         .dpad-btn:active {
@@ -227,6 +228,7 @@
             padding: 0;
             flex: 1;
             min-width: 35px;
+            user-select: none;
         }
 
         .action-btn:active {
@@ -267,6 +269,7 @@
             font-size: 0.65em;
             color: white;
             font-weight: bold;
+            user-select: none;
         }
 
         .shoulder-btn:active {
@@ -324,26 +327,26 @@
             <div class="gamepad">
                 <div class="gamepad-grid">
                     <div class="dpad-container">
-                        <button class="dpad-btn dpad-up" ontouchstart="keyDown(0x0040)" ontouchend="keyUp(0x0040)" onmousedown="keyDown(0x0040)" onmouseup="keyUp(0x0040)">⬆</button>
-                        <button class="dpad-btn dpad-left" ontouchstart="keyDown(0x0020)" ontouchend="keyUp(0x0020)" onmousedown="keyDown(0x0020)" onmouseup="keyUp(0x0020)">⬅</button>
-                        <button class="dpad-btn dpad-down" ontouchstart="keyDown(0x0080)" ontouchend="keyUp(0x0080)" onmousedown="keyDown(0x0080)" onmouseup="keyUp(0x0080)">⬇</button>
-                        <button class="dpad-btn dpad-right" ontouchstart="keyDown(0x0010)" ontouchend="keyUp(0x0010)" onmousedown="keyDown(0x0010)" onmouseup="keyUp(0x0010)">➡</button>
+                        <button class="dpad-btn dpad-up" data-key="UP">⬆</button>
+                        <button class="dpad-btn dpad-left" data-key="LEFT">⬅</button>
+                        <button class="dpad-btn dpad-down" data-key="DOWN">⬇</button>
+                        <button class="dpad-btn dpad-right" data-key="RIGHT">➡</button>
                     </div>
 
                     <div class="button-pair">
-                        <button class="action-btn btn-b" ontouchstart="keyDown(0x0002)" ontouchend="keyUp(0x0002)" onmousedown="keyDown(0x0002)" onmouseup="keyUp(0x0002)">B</button>
-                        <button class="action-btn btn-a" ontouchstart="keyDown(0x0001)" ontouchend="keyUp(0x0001)" onmousedown="keyDown(0x0001)" onmouseup="keyUp(0x0001)">A</button>
+                        <button class="action-btn btn-b" data-key="B">B</button>
+                        <button class="action-btn btn-a" data-key="A">A</button>
                     </div>
                 </div>
 
                 <div class="shoulder-row" style="margin-top: 4px;">
-                    <button class="shoulder-btn" ontouchstart="keyDown(0x0200)" ontouchend="keyUp(0x0200)" onmousedown="keyDown(0x0200)" onmouseup="keyUp(0x0200)">L</button>
-                    <button class="shoulder-btn" ontouchstart="keyDown(0x0100)" ontouchend="keyUp(0x0100)" onmousedown="keyDown(0x0100)" onmouseup="keyUp(0x0100)">R</button>
+                    <button class="shoulder-btn" data-key="L">L</button>
+                    <button class="shoulder-btn" data-key="R">R</button>
                 </div>
 
                 <div class="shoulder-row" style="margin-top: 4px;">
-                    <button class="shoulder-btn" ontouchstart="keyDown(0x0004)" ontouchend="keyUp(0x0004)" onmousedown="keyDown(0x0004)" onmouseup="keyUp(0x0004)">SEL</button>
-                    <button class="shoulder-btn" ontouchstart="keyDown(0x0008)" ontouchend="keyUp(0x0008)" onmousedown="keyDown(0x0008)" onmouseup="keyUp(0x0008)">STR</button>
+                    <button class="shoulder-btn" data-key="SELECT">SEL</button>
+                    <button class="shoulder-btn" data-key="START">STR</button>
                 </div>
             </div>
         </div>
@@ -353,6 +356,7 @@
     <script>
         let emulator = null;
         const status = document.getElementById('status');
+        const keyStates = {};
 
         function updateStatus(message, type = 'info') {
             status.textContent = message;
@@ -362,6 +366,81 @@
             if (type === 'loading') status.classList.add('loading');
         }
 
+        function handleKeyPress(key, isPressed) {
+            if (!emulator) return;
+
+            const keyMap = {
+                'A': 0,
+                'B': 1,
+                'SELECT': 2,
+                'START': 3,
+                'RIGHT': 4,
+                'LEFT': 5,
+                'UP': 6,
+                'DOWN': 7,
+                'R': 8,
+                'L': 9
+            };
+
+            if (keyMap.hasOwnProperty(key)) {
+                keyStates[key] = isPressed;
+                emulator.keyboardHandler[keyMap[key]] = isPressed;
+            }
+        }
+
+        // Configurar botones táctiles
+        document.querySelectorAll('button[data-key]').forEach(btn => {
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                handleKeyPress(btn.dataset.key, true);
+            });
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                handleKeyPress(btn.dataset.key, false);
+            });
+            btn.addEventListener('mousedown', () => {
+                handleKeyPress(btn.dataset.key, true);
+            });
+            btn.addEventListener('mouseup', () => {
+                handleKeyPress(btn.dataset.key, false);
+            });
+            btn.addEventListener('mouseleave', () => {
+                handleKeyPress(btn.dataset.key, false);
+            });
+        });
+
+        // Configurar teclado
+        const keyboardMap = {
+            'ArrowUp': 'UP',
+            'ArrowDown': 'DOWN',
+            'ArrowLeft': 'LEFT',
+            'ArrowRight': 'RIGHT',
+            'z': 'A',
+            'Z': 'A',
+            'x': 'B',
+            'X': 'B',
+            'q': 'L',
+            'Q': 'L',
+            'w': 'R',
+            'W': 'R',
+            'Enter': 'START',
+            ' ': 'SELECT'
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (keyboardMap[e.key]) {
+                handleKeyPress(keyboardMap[e.key], true);
+                if (e.key === ' ') e.preventDefault();
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (keyboardMap[e.key]) {
+                handleKeyPress(keyboardMap[e.key], false);
+                if (e.key === ' ') e.preventDefault();
+            }
+        });
+
         async function initEmulator() {
             try {
                 updateStatus('⏳ Cargando ROM...', 'loading');
@@ -369,7 +448,7 @@
                 const response = await fetch('Pokemon - FireRed Version (USA).gba');
                 
                 if (!response.ok) {
-                    throw new Error(`Error al cargar: ${response.status}`);
+                    throw new Error(`Error HTTP: ${response.status}`);
                 }
 
                 const romData = await response.arrayBuffer();
@@ -380,13 +459,11 @@
                 emulator.attachCanvas(canvas);
                 emulator.loadRom(romData);
                 
-                emulator.runStable = function() {
-                    this.step();
-                    this.advanceFrame();
-                };
-
+                // Iniciar game loop
                 const gameLoop = () => {
-                    emulator.runStable();
+                    if (emulator) {
+                        emulator.advanceFrame();
+                    }
                     requestAnimationFrame(gameLoop);
                 };
                 gameLoop();
@@ -407,53 +484,13 @@
             }
         }
 
-        function keyDown(key) {
-            if (emulator) emulator.keyDown(key);
-        }
-
-        function keyUp(key) {
-            if (emulator) emulator.keyUp(key);
-        }
-
-        document.addEventListener('keydown', (e) => {
-            if (!emulator) return;
-            switch(e.key.toLowerCase()) {
-                case 'arrowup': keyDown(0x0040); break;
-                case 'arrowdown': keyDown(0x0080); break;
-                case 'arrowleft': keyDown(0x0020); break;
-                case 'arrowright': keyDown(0x0010); break;
-                case 'z': keyDown(0x0001); break;
-                case 'x': keyDown(0x0002); break;
-                case 'q': keyDown(0x0200); break;
-                case 'w': keyDown(0x0100); break;
-                case 'enter': keyDown(0x0008); break;
-                case ' ': keyDown(0x0004); e.preventDefault(); break;
-            }
-        });
-
-        document.addEventListener('keyup', (e) => {
-            if (!emulator) return;
-            switch(e.key.toLowerCase()) {
-                case 'arrowup': keyUp(0x0040); break;
-                case 'arrowdown': keyUp(0x0080); break;
-                case 'arrowleft': keyUp(0x0020); break;
-                case 'arrowright': keyUp(0x0010); break;
-                case 'z': keyUp(0x0001); break;
-                case 'x': keyUp(0x0002); break;
-                case 'q': keyUp(0x0200); break;
-                case 'w': keyUp(0x0100); break;
-                case 'enter': keyUp(0x0008); break;
-                case ' ': keyUp(0x0004); break;
-            }
-        });
-
         window.addEventListener('load', initEmulator);
 
         document.addEventListener('touchstart', () => {
             if (document.documentElement.requestFullscreen) {
                 document.documentElement.requestFullscreen().catch(() => {});
             }
-        });
+        }, { passive: true });
     </script>
 </body>
 </html>
